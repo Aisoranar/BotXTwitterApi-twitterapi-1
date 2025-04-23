@@ -10,6 +10,7 @@ const client = axios.create({
 /**
  * Obtiene información detallada de un usuario.
  * @param {string} username 
+ * @returns {Promise<Object>}
  */
 async function getUser(username) {
   const res = await client.get('/twitter/user/info', {
@@ -22,6 +23,7 @@ async function getUser(username) {
  * Obtiene hasta `count` últimos tweets de un usuario (excluye replies).
  * @param {string} username 
  * @param {number} count 
+ * @returns {Promise<Array>}
  */
 async function getUserLastTweets(username, count = 5) {
   const res = await client.get('/twitter/user/last_tweets', {
@@ -35,6 +37,7 @@ async function getUserLastTweets(username, count = 5) {
  * Obtiene hasta `count` menciones a un usuario.
  * @param {string} username 
  * @param {number} count 
+ * @returns {Promise<Array>}
  */
 async function getMentions(username, count = 5) {
   const res = await client.get('/twitter/user/mentions', {
@@ -45,9 +48,10 @@ async function getMentions(username, count = 5) {
 }
 
 /**
- * Obtiene hasta `count` replies del usuario (usa búsqueda avanzada).
+ * Obtiene hasta `count` replies hechos por el usuario (búsqueda avanzada).
  * @param {string} username 
  * @param {number} count 
+ * @returns {Promise<Array>}
  */
 async function getUserReplies(username, count = 5) {
   const query = `from:${username} filter:replies`;
@@ -59,9 +63,10 @@ async function getUserReplies(username, count = 5) {
 }
 
 /**
- * Obtiene hasta `count` retweets del usuario (usa búsqueda avanzada).
+ * Obtiene hasta `count` retweets hechos por el usuario (búsqueda avanzada).
  * @param {string} username 
  * @param {number} count 
+ * @returns {Promise<Array>}
  */
 async function getUserRetweets(username, count = 5) {
   const query = `from:${username} filter:retweets`;

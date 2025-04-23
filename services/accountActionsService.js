@@ -3,8 +3,9 @@ const twitterApi = require('./twitterApi');
 const logger     = require('../utils/logger');
 
 /**
- * Muestra datos detallados de un usuario.
+ * Muestra datos detallados de un usuario en formato HTML.
  * @param {string} username
+ * @returns {Promise<string>}
  */
 async function viewUser(username) {
   try {
@@ -27,10 +28,11 @@ async function viewUser(username) {
 }
 
 /**
- * Muestra los últimos 5 tweets de un usuario.
+ * Muestra los últimos 5 tweets de un usuario en forma de columna.
  * @param {string} username
+ * @returns {Promise<string>}
  */
-async function lastTweets(username) {
+async function lastTweet(username) {
   try {
     const tweets = await twitterApi.getUserLastTweets(username, 5);
     if (!tweets.length) {
@@ -46,8 +48,9 @@ async function lastTweets(username) {
 }
 
 /**
- * Muestra las últimas 5 menciones a un usuario.
+ * Muestra las últimas 5 menciones al usuario en forma de columna.
  * @param {string} username
+ * @returns {Promise<string>}
  */
 async function mentions(username) {
   try {
@@ -65,8 +68,9 @@ async function mentions(username) {
 }
 
 /**
- * Muestra las últimas 5 respuestas que el usuario hizo.
+ * Muestra las últimas 5 respuestas hechas por el usuario en forma de columna.
  * @param {string} username
+ * @returns {Promise<string>}
  */
 async function replies(username) {
   try {
@@ -84,8 +88,9 @@ async function replies(username) {
 }
 
 /**
- * Muestra los últimos 5 retweets que el usuario hizo.
+ * Muestra los últimos 5 retweets hechos por el usuario en forma de columna.
  * @param {string} username
+ * @returns {Promise<string>}
  */
 async function retweets(username) {
   try {
@@ -94,7 +99,7 @@ async function retweets(username) {
       return `🔁 @${username} no ha retweeteado recientemente.`;
     }
     return tweets
-      .map(r => `• ${r.text}\n  🔗 <a href="${r.url}">Ver en X</a>`)
+      .map(rt => `• ${rt.text}\n  🔗 <a href="${rt.url}">Ver en X</a>`)
       .join('\n\n');
   } catch (e) {
     logger.error(e.stack);
@@ -104,7 +109,7 @@ async function retweets(username) {
 
 module.exports = {
   viewUser,
-  lastTweets,
+  lastTweet,    // corregido: exportar lastTweet (singular)
   mentions,
   replies,
   retweets
