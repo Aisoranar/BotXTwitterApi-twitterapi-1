@@ -124,7 +124,8 @@ function planMenu() {
 }
 
 /**
- * Menú de acciones disponibles para una cuenta seleccionada.
+ * Menú de acciones disponibles para una cuenta seleccionada,
+ * organizado en 2 filas de 3 botones (columna x columna).
  * @param {string} username
  */
 function accountActionsMenu(username) {
@@ -132,12 +133,16 @@ function accountActionsMenu(username) {
     parse_mode: 'HTML',
     reply_markup: {
       inline_keyboard: [
-        [{ text: '👤 Ver usuario',      callback_data: `view_user:${username}` }],
-        [{ text: '📝 Último tweet',      callback_data: `last_tweet:${username}` }],
-        [{ text: '📣 Ver menciones',     callback_data: `mentions:${username}` }],
-        [{ text: '💬 Ver respuestas',    callback_data: `replies:${username}` }],
-        [{ text: '🔁 Ver retweets',      callback_data: `retweets:${username}` }],
-        [{ text: '⬅️ Volver',            callback_data: 'back' }]
+        [
+          { text: '👤 Ver usuario',      callback_data: `view_user:${username}` },
+          { text: '📝 Últimos tweets',   callback_data: `lastTweets:${username}` },
+          { text: '📣 Ver menciones',     callback_data: `mentions:${username}` }
+        ],
+        [
+          { text: '💬 Ver respuestas',    callback_data: `replies:${username}` },
+          { text: '🔁 Ver retweets',      callback_data: `retweets:${username}` },
+          { text: '⬅️ Volver',            callback_data: 'back' }
+        ]
       ]
     }
   };
