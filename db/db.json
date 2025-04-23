@@ -2,43 +2,31 @@
   "1049055567": {
     "tracked": [
       {
-        "username": "jessepollak",
-        "active": true,
-        "lastId": null
-      }
-    ],
-    "plan": "intermediate"
-  },
-  "1339853448": {
-    "trackedAccounts": [
-      {
-        "username": "BasedJaider",
-        "realtimeActive": false,
-        "lastTweetId": null
+        "username": "Jessepollak",
+        "active": false,
+        "ruleId": null,
+        "lastChecked": null
       },
       {
-        "username": "AArias53727",
-        "realtimeActive": true,
-        "lastTweetId": null
+        "username": "BasedJaider",
+        "active": false,
+        "ruleId": null,
+        "lastChecked": null
       }
     ],
-    "plan": "premium",
+    "plan": "intermediate",
+    "groupChatId": null
+  },
+  "1339853448": {
     "tracked": [
       {
         "username": "BasedJaider",
         "active": false,
-        "lastId": null,
-        "ruleId": "1f247ec6a36f4bce95504e12f71d05f4",
-        "lastChecked": "2025-04-23T05:14:16.201Z"
-      },
-      {
-        "username": "AArias53727",
-        "active": true,
-        "ruleId": "12e7e501794b414fb5b901140e8e7e3d",
-        "lastChecked": "2025-04-23T06:42:15.244Z"
+        "ruleId": null,
+        "lastChecked": null
       }
     ],
+    "plan": "premium",
     "groupChatId": -1002513153868
-  },
-  "_groupChatId": -1002513153868
+  }
 }

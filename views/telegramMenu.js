@@ -1,5 +1,9 @@
 // D:\Documents\GitHub\BotXTwitterApi-twitterapi\views\telegramMenu.js
 
+/**
+ * Menú principal con botones agrupados de forma dinámica.
+ * @param {boolean} isAdmin - Si el usuario es administrador.
+ */
 function mainMenu(isAdmin) {
   const items = [
     { text: '➕ Agregar',     callback_data: 'add' },
@@ -33,21 +37,58 @@ function mainMenu(isAdmin) {
   };
 }
 
+/** Mensaje de solicitud de nombre de cuenta. */
 function promptUsername() {
   return '✏️ Ingresa el nombre de la cuenta (sin @):';
 }
 
+/**
+ * Vista de lista simple (texto plano).
+ * @param {Array} accounts
+ */
 function listView(accounts) {
   return accounts.length
-    ? accounts.map(a => `• @${a.username}${a.active?' 🔔':''}`).join('\n')
+    ? accounts.map(a => `• @${a.username}${a.active ? ' 🔔' : ''}`).join('\n')
     : '📂 No tienes cuentas agregadas.';
 }
 
+/**
+ * Menú interactivo para ver cuentas con botones.
+ * @param {Array} accounts
+ */
+function listMenu(accounts) {
+  if (!accounts.length) {
+    return {
+      text: '📂 No tienes cuentas agregadas.',
+      parse_mode: 'HTML'
+    };
+  }
+
+  const rows = accounts.map(a => ([
+    {
+      text: `@${a.username}${a.active ? ' 🔔' : ''}`,
+      callback_data: `show_actions:${a.username}`
+    }
+  ]));
+  rows.push([{ text: '⬅️ Volver', callback_data: 'back' }]);
+
+  return {
+    parse_mode: 'HTML',
+    reply_markup: { inline_keyboard: rows }
+  };
+}
+
+/**
+ * Menú de seguimiento en tiempo real.
+ * @param {Array} accounts
+ */
 function realtimeMenu(accounts) {
   if (!accounts.length) return null;
   const rows = accounts.map(a => ([
     {
-      text: a.active ? `🛑 Detener @${a.username}` : `▶️ Seguir @${a.username}`,
+      text: a.active
+        ? `🛑 Detener @${a.username}`
+        : `▶️ Seguir @${a.username}`,
       callback_data: `toggle:${a.username}`
     }
   ]));
@@ -58,27 +99,45 @@ function realtimeMenu(accounts) {
   };
 }
 
+/**
+ * Menú de selección de plan en dos columnas con emojis.
+ */
 function planMenu() {
-  const plans = Object.keys(require('../config').PLANS);
-  const rows = plans.map(p => ([{ text: p, callback_data: `plan:${p}` }]));
-  rows.push([{ text: '⬅️ Volver', callback_data: 'back' }]);
   return {
     parse_mode: 'HTML',
-    reply_markup: { inline_keyboard: rows }
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: '🥉 Basic',        callback_data: 'plan:basic' },
+          { text: '🥈 Intermediate', callback_data: 'plan:intermediate' }
+        ],
+        [
+          { text: '🥇 Pro',          callback_data: 'plan:pro' },
+          { text: '🏆 Premium',      callback_data: 'plan:premium' }
+        ],
+        [
+          { text: '⬅️ Volver',       callback_data: 'back' }
+        ]
+      ]
+    }
   };
 }
 
+/**
+ * Menú de acciones disponibles para una cuenta seleccionada.
+ * @param {string} username
+ */
 function accountActionsMenu(username) {
   return {
     parse_mode: 'HTML',
     reply_markup: {
       inline_keyboard: [
-        [{ text: '👤 Ver usuario', callback_data: `view_user:${username}` }],
-        [{ text: '📝 Último tweet', callback_data: `last_tweet:${username}` }],
-        [{ text: '📣 Menciones',    callback_data: `mentions:${username}` }],
-        [{ text: '💬 Respuestas',   callback_data: `replies:${username}` }],
-        [{ text: '🔁 Retweets',     callback_data: `retweets:${username}` }],
-        [{ text: '⬅️ Volver',       callback_data: 'back' }]
+        [{ text: '👤 Ver usuario',      callback_data: `view_user:${username}` }],
+        [{ text: '📝 Último tweet',      callback_data: `last_tweet:${username}` }],
+        [{ text: '📣 Ver menciones',     callback_data: `mentions:${username}` }],
+        [{ text: '💬 Ver respuestas',    callback_data: `replies:${username}` }],
+        [{ text: '🔁 Ver retweets',      callback_data: `retweets:${username}` }],
+        [{ text: '⬅️ Volver',            callback_data: 'back' }]
       ]
     }
   };
@@ -88,6 +147,7 @@ module.exports = {
   mainMenu,
   promptUsername,
   listView,
+  listMenu,
   realtimeMenu,
   planMenu,
   accountActionsMenu
