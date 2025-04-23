@@ -53,24 +53,36 @@ bot.on('callback_query', async (q) => {
         states[userId] = { state: 'AWAIT_ADD' };
         await bot.sendMessage(chatId, menu.promptUsername());
         break;
+
       case 'delete':
         states[userId] = { state: 'AWAIT_DELETE' };
         const list = await db.listAccounts(userId);
-        const kb   = list.map(a=>([{ text:`🗑️ @${a.username}`, callback_data:`do_delete:${a.username}` }]));
+        const kb   = list.map(a=>(
+          [{ text:`🗑️ @${a.username}`, callback_data:`do_delete:${a.username}` }]
+        ));
         kb.push([{ text:'⬅️ Volver', callback_data:'back' }]);
-        await bot.sendMessage(chatId,'Selecciona cuenta a eliminar:',{ reply_markup:{ inline_keyboard:kb } });
+        await bot.sendMessage(chatId,'Selecciona cuenta a eliminar:',{
+          reply_markup:{ inline_keyboard:kb }
+        });
         break;
+
       case 'do_delete':
         await db.removeAccount(userId,arg);
         await bot.sendMessage(chatId,`🗑️ Cuenta @${arg} eliminada.`);
         states[userId] = {};
         await bot.sendMessage(chatId,'Elige una opción:',menu.mainMenu(admin));
         break;
+
       case 'list': {
         const accs = await db.listAccounts(userId);
-        await bot.sendMessage(chatId, `<b>📋 Tus cuentas:</b>\n${menu.listView(accs)}`, { parse_mode:'HTML' });
+        await bot.sendMessage(
+          chatId,
+          `<b>📋 Tus cuentas:</b>\n${menu.listView(accs)}`,
+          { parse_mode:'HTML' }
+        );
         break;
       }
+
       case 'realtime': {
         states[userId] = { state:'AWAIT_REALTIME' };
         const accs = await db.listAccounts(userId);
@@ -79,6 +91,7 @@ bot.on('callback_query', async (q) => {
         else   await bot.sendMessage(chatId,'No tienes cuentas.');
         break;
       }
+
       case 'toggle': {
         const accs = await db.listAccounts(userId);
         const acc  = accs.find(a=>a.username===arg);
@@ -90,59 +103,109 @@ bot.on('callback_query', async (q) => {
         await bot.sendMessage(chatId,'<b>🔔 Seguimiento realtime</b>',menu.realtimeMenu(updated));
         break;
       }
+
       case 'plan_menu':
         if (admin) await bot.sendMessage(chatId,'Elige plan:',menu.planMenu());
         else       await bot.sendMessage(chatId,'Solo admin.');
         break;
+
       case 'plan':
         if (admin) {
           await planSvc.upgradePlan(userId,arg);
-          await bot.sendMessage(chatId,`✅ Plan: <b>${arg}</b>`,{ parse_mode:'HTML' });
+          await bot.sendMessage(
+            chatId,
+            `✅ Plan: <b>${arg}</b>`,
+            { parse_mode:'HTML' }
+          );
         } else await bot.sendMessage(chatId,'No tienes permiso.');
         break;
+
       case 'actions': {
         const accs = await db.listAccounts(userId);
         if (!accs.length) {
           await bot.sendMessage(chatId,'No tienes cuentas.');
           break;
         }
-        const kb2 = accs.map(a=>([{ text:`@${a.username}`, callback_data:`show_actions:${a.username}` }]));
+        const kb2 = accs.map(a=>(
+          [{ text:`@${a.username}`, callback_data:`show_actions:${a.username}` }]
+        ));
         kb2.push([{ text:'⬅️ Volver', callback_data:'back' }]);
-        await bot.sendMessage(chatId,'Selecciona cuenta:',{ reply_markup:{ inline_keyboard:kb2 } });
+        await bot.sendMessage(chatId,'Selecciona cuenta:',{
+          reply_markup:{ inline_keyboard:kb2 }
+        });
         break;
       }
+
       case 'show_actions':
-        await bot.sendMessage(chatId,`Acciones de @${arg}:`,menu.accountActionsMenu(arg));
+        await bot.sendMessage(
+          chatId,
+          `Acciones de @${arg}:`,
+          menu.accountActionsMenu(arg)
+        );
         break;
+
       case 'view_user': {
         const txt = await acctSvc.viewUser(arg);
-        await bot.sendMessage(chatId,txt,{ parse_mode:'HTML',disable_web_page_preview:true });
+        await bot.sendMessage(
+          chatId,
+          txt,
+          { parse_mode:'HTML',disable_web_page_preview:true }
+        );
         break;
       }
+
       case 'last_tweet': {
         const txt = await acctSvc.lastTweet(arg);
-        await bot.sendMessage(chatId,txt,{ parse_mode:'HTML',disable_web_page_preview:true });
+        await bot.sendMessage(
+          chatId,
+          txt,
+          { parse_mode:'HTML',disable_web_page_preview:true }
+        );
         break;
       }
+
       case 'mentions': {
         const txt = await acctSvc.mentions(arg);
-        await bot.sendMessage(chatId,txt,{ parse_mode:'HTML',disable_web_page_preview:true });
+        await bot.sendMessage(
+          chatId,
+          txt,
+          { parse_mode:'HTML',disable_web_page_preview:true }
+        );
         break;
       }
+
       case 'replies': {
         const txt = await acctSvc.replies(arg);
-        await bot.sendMessage(chatId,txt,{ parse_mode:'HTML',disable_web_page_preview:true });
+        await bot.sendMessage(
+          chatId,
+          txt,
+          { parse_mode:'HTML',disable_web_page_preview:true }
+        );
         break;
       }
+
       case 'retweets': {
         const txt = await acctSvc.retweets(arg);
-        await bot.sendMessage(chatId,txt,{ parse_mode:'HTML',disable_web_page_preview:true });
+        await bot.sendMessage(
+          chatId,
+          txt,
+          { parse_mode:'HTML',disable_web_page_preview:true }
+        );
         break;
       }
+
       case 'back':
+        // Si venimos del menú realtime, detenemos todos los seguimientos activos
+        if (states[userId]?.state === 'AWAIT_REALTIME') {
+          const accs = await db.listAccounts(userId);
+          for (const a of accs.filter(a => a.active)) {
+            await trackSvc.stopTracking(bot, chatId, userId, a.username);
+          }
+        }
         states[userId] = {};
         await bot.sendMessage(chatId,'Elige una opción:',menu.mainMenu(admin));
         break;
+
       case 'exit':
         delete states[userId];
         await bot.sendMessage(chatId,'✔️ Hasta luego! Usa /start para volver.');
@@ -155,7 +218,7 @@ bot.on('callback_query', async (q) => {
   }
 });
 
-// Flujo de texto libre (solo en privado) para AWAIT_ADD
+// Manejo de texto libre para AWAIT_ADD
 bot.on('message', async (msg) => {
   if (msg.text?.startsWith('/start')) return;
   if (msg.chat.type !== 'private') return;
