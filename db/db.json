@@ -26,16 +26,16 @@
     "tracked": [
       {
         "username": "BasedJaider",
-        "active": true,
+        "active": false,
         "lastId": null,
         "ruleId": "1f247ec6a36f4bce95504e12f71d05f4",
         "lastChecked": "2025-04-23T05:14:16.201Z"
       },
       {
         "username": "AArias53727",
-        "active": true,
+        "active": false,
         "ruleId": "12e7e501794b414fb5b901140e8e7e3d",
-        "lastChecked": "2025-04-23T05:14:27.092Z"
+        "lastChecked": "2025-04-23T05:24:36.117Z"
       }
     ],
     "groupChatId": -1002513153868

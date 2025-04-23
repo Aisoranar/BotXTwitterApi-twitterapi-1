@@ -10,13 +10,12 @@ const logger = require('../utils/logger');
 const { API_KEY, BASE_URL } = require('../config');
 
 // Configuración de polling
-const CHECK_INTERVAL     = parseInt(process.env.CHECK_INTERVAL || '300', 10); // segundos
+const CHECK_INTERVAL     = parseInt(process.env.CHECK_INTERVAL || '120', 10); // segundos (2 minutos por defecto)
 const TIME_WINDOW_HOURS = parseFloat(process.env.TIME_WINDOW_HOURS || '1');    // horas
-const checkIntervalMs   = CHECK_INTERVAL * 1000;
 const timeWindowMs      = TIME_WINDOW_HOURS * 3600 * 1000;
 
-// Mapa de intervalos activos: key = "<userId>:<username>"
-const pollIntervals = {};
+// Almacena intervalos de polling y countdown: key = "<userId>:<username>"
+const intervalsMap = {};
 
 // Util: formatea fecha a "YYYY-MM-DD_HH:mm:ss_UTC"
 function formatUtcKey(date) {
@@ -46,9 +45,7 @@ function formatTweetHtml(tweet, username) {
   msg += `<b>🚀 Nuevo tweet de @${escapeHtml(username)}</b>\n`;
   msg += `<code>${createdFmt}</code>\n\n`;
   msg += `${text}\n`;
-  if (tweetUrl) {
-    msg += `\n🔗 <a href="${tweetUrl}">Ver en Twitter</a>`;
-  }
+  if (tweetUrl) msg += `\n🔗 <a href="${tweetUrl}">Ver en Twitter</a>`;
   return msg;
 }
 
@@ -57,11 +54,8 @@ async function checkUserTweets(bot, chatId, userId, username) {
   try {
     const user = await db.getUser(userId);
     const acc  = user.tracked.find(a => a.username === username);
-    if (!acc) {
-      return logger.warn(`@${username} no encontrado para userId=${userId}`);
-    }
+    if (!acc) return logger.warn(`@${username} no encontrado para userId=${userId}`);
 
-    // Determinar rango de tiempo
     const lastChecked = acc.lastChecked
       ? new Date(acc.lastChecked)
       : new Date(Date.now() - timeWindowMs);
@@ -89,10 +83,7 @@ async function checkUserTweets(bot, chatId, userId, username) {
       logger.info(`🔔 ${tweets.length} nuevos tweets de @${username}`);
       for (const tweet of tweets) {
         const html = formatTweetHtml(tweet, username);
-        await bot.sendMessage(chatId, html, {
-          parse_mode: 'HTML',
-          disable_web_page_preview: false
-        });
+        await bot.sendMessage(chatId, html, { parse_mode: 'HTML', disable_web_page_preview: false });
       }
     } else {
       logger.debug(`⏸️ No hay nuevos tweets de @${username}`);
@@ -106,7 +97,7 @@ async function checkUserTweets(bot, chatId, userId, username) {
   }
 }
 
-// Activa seguimiento: arranca polling periódico
+// Activa seguimiento: arranca polling y countdown
 async function startTracking(bot, chatId, userId, username) {
   const userData = await db.getUser(userId);
   const acc      = userData.tracked.find(a => a.username === username);
@@ -119,39 +110,55 @@ async function startTracking(bot, chatId, userId, username) {
     return;
   }
 
+  // Marcar activo y guardar lastChecked inicial
   acc.active = true;
   acc.lastChecked = acc.lastChecked || new Date(Date.now() - timeWindowMs).toISOString();
   await db.updateAccount(userId, acc);
 
   const key = `${userId}:${username}`;
-  pollIntervals[key] = setInterval(
-    () => checkUserTweets(bot, chatId, userId, username),
-    checkIntervalMs
-  );
+  let remaining = CHECK_INTERVAL;
 
-  // Ejecutar inmediatamente
+  // Countdown real-time cada segundo
+  const countdownId = setInterval(() => {
+    remaining--;
+    if (remaining >= 0) {
+      logger.info(`[${username}] Tiempo hasta próximo chequeo: ${remaining}s`);
+    }
+  }, 1000);
+
+  // Polling cada CHECK_INTERVAL segundos
+  const checkId = setInterval(async () => {
+    await checkUserTweets(bot, chatId, userId, username);
+    remaining = CHECK_INTERVAL; // reiniciar conteo
+  }, CHECK_INTERVAL * 1000);
+
+  intervalsMap[key] = { countdownId, checkId };
+
+  logger.info(`[${username}] Countdown iniciado: ${CHECK_INTERVAL}s hasta el primer chequeo.`);
+
+  // Ejecutar primera vez inmediatamente
   await checkUserTweets(bot, chatId, userId, username);
+  remaining = CHECK_INTERVAL;
 
   await bot.sendMessage(chatId, `🔔 Seguimiento ACTIVADO para @${username}`);
 }
 
-// Desactiva seguimiento: limpia el intervalo
+// Desactiva seguimiento: limpia intervalos
 async function stopTracking(bot, chatId, userId, username) {
+  const accKey = `${userId}:${username}`;
+  const accIntervals = intervalsMap[accKey];
+  if (accIntervals) {
+    clearInterval(accIntervals.countdownId);
+    clearInterval(accIntervals.checkId);
+    delete intervalsMap[accKey];
+  }
+
   const userData = await db.getUser(userId);
   const acc      = userData.tracked.find(a => a.username === username);
-  if (!acc || !acc.active) {
-    await bot.sendMessage(chatId, `🛑 @${username} no estaba activo.`);
-    return;
+  if (acc) {
+    acc.active = false;
+    await db.updateAccount(userId, acc);
   }
-
-  const key = `${userId}:${username}`;
-  if (pollIntervals[key]) {
-    clearInterval(pollIntervals[key]);
-    delete pollIntervals[key];
-  }
-
-  acc.active = false;
-  await db.updateAccount(userId, acc);
 
   await bot.sendMessage(chatId, `🛑 Seguimiento DETENIDO para @${username}`);
 }
