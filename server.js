@@ -6,40 +6,51 @@ const bodyParser  = require('body-parser');
 const TelegramBot = require('node-telegram-bot-api');
 const config      = require('./config');
 const logger      = require('./utils/logger');
+const db          = require('./db/database');
 
 const bot = new TelegramBot(config.TELEGRAM_TOKEN);
 const app = express();
-
 app.use(bodyParser.json());
 
-app.post('/webhook', (req, res) => {
+app.post('/webhook', async (req, res) => {
+  logger.info('🔔 /webhook invocado', { headers: req.headers, body: req.body });
   try {
-    const { tweet } = req.body;
-
-    if (!tweet || !tweet.text || !tweet.author?.userName || !tweet.url) {
-      logger.warn('Datos del tweet incompletos o inválidos.');
-      return res.status(400).json({ error: 'Tweet inválido o incompleto' });
+    const incomingKey = req.header('X-API-Key');
+    if (incomingKey !== config.API_KEY) {
+      logger.warn('🔒 API key inválida');
+      return res.sendStatus(401);
     }
+    const payload = req.body;
+    if (payload.event_type !== 'tweet' || !Array.isArray(payload.tweets)) {
+      logger.info('⚪ Evento no relevante');
+      return res.sendStatus(200);
+    }
+    for (const tweet of payload.tweets) {
+      const username = tweet.author.username;
+      const text     = tweet.text;
+      const url      = `https://twitter.com/${username}/status/${tweet.id}`;
+      logger.info(`▶️ Tweet de @${username}: ${text.slice(0,50)}…`);
 
-    const username = tweet.author.userName;
-    const text     = tweet.text;
-    const url      = tweet.url;
-    const chatId   = config.WEBHOOK_CHAT_ID;
-
-    const message = `🆕 <b>@${username}</b>: ${text}\n🔗 <a href="${url}">${url}</a>`;
-
-    bot.sendMessage(chatId, message, {
-      parse_mode: 'HTML',
-      disable_web_page_preview: true
-    }).catch(e => logger.error('Error enviando mensaje:', e));
-
+      // Fan-out: solo usuarios con active=true y groupChatId
+      const all = db.getAllUsers();
+      for (const uid of Object.keys(all)) {
+        const user = await db.getUser(uid);
+        const acc  = user.tracked.find(a => a.username===username && a.active);
+        if (!acc || !user.groupChatId) continue;
+        const chatId = user.groupChatId;
+        const msg = `🆕 <b>Nuevo tweet de @${username}</b>\n\n${text}\n\n🔗 <a href="${url}">Ver</a>`;
+        await bot.sendMessage(chatId,msg,{ parse_mode:'HTML',disable_web_page_preview:true })
+          .then(()=> logger.info(`✅ Enviado a chat ${chatId}`))
+          .catch(e=> logger.error(`❌ Error a ${chatId}: ${e.message}`));
+      }
+    }
     res.status(200).json({ success: true });
   } catch (err) {
-    logger.error('Error en webhook:', err);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    logger.error(`💥 /webhook fallo: ${err.stack}`);
+    res.status(500).json({ error: 'Error interno' });
   }
 });
 
-app.listen(config.WEBHOOK_PORT, () => {
-  logger.info(`✅ Webhook escuchando en el puerto ${config.WEBHOOK_PORT}`);
-});
+app.listen(config.WEBHOOK_PORT, () =>
+  logger.info(`🚀 Webhook escuchando en ${config.WEBHOOK_PORT}`)
+);

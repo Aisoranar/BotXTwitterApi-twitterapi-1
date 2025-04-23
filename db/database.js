@@ -6,56 +6,61 @@ const { PLANS } = require('../config');
 const DB_PATH = path.join(__dirname, 'db.json');
 let db = {};
 
-// Cargar la base de datos desde archivo
+// Carga inicial de la DB
 async function loadDB() {
   db = await fs.readJson(DB_PATH).catch(() => ({}));
 }
-
-// Guardar la base de datos en archivo
+// Persiste la DB
 async function saveDB() {
   await fs.writeJson(DB_PATH, db, { spaces: 2 });
 }
 
-// Inicializar un usuario si no existe
+// Asegura que el usuario tenga un entry, y guarda el chat de grupo
 async function initUser(userId) {
   if (!db[userId]) {
     db[userId] = {
-      tracked: [],
-      plan:    'intermediate'
+      tracked:      [],  // cuentas a seguir
+      plan:    'intermediate',
+      groupChatId: null  // grupo donde llamó /start
     };
     await saveDB();
   }
 }
 
-// Obtener usuario, asegurando su inicialización
+// Obtiene usuario (inicia si no existe)
 async function getUser(userId) {
   await initUser(userId);
   return db[userId];
 }
 
-// Agregar una cuenta a seguimiento
+// Retorna todos los usuarios (para fan-out)
+function getAllUsers() {
+  return db;
+}
+
+// Asocia al usuario con un chat de grupo
+async function setUserGroupChat(userId, chatId) {
+  const user = await getUser(userId);
+  user.groupChatId = chatId;
+  await saveDB();
+}
+
+// Agrega una cuenta a seguir
 async function addAccount(userId, username) {
   const user  = await getUser(userId);
   const limit = PLANS[user.plan] || PLANS.intermediate;
-
   if (user.tracked.some(a => a.username === username)) {
     return { ok: false, reason: 'exists' };
   }
   if (user.tracked.length >= limit) {
     return { ok: false, reason: 'limit' };
   }
-
-  // Nuevo campo ruleId para Webhook/Websocket
-  user.tracked.push({
-    username,
-    active: false,
-    ruleId: null
-  });
+  user.tracked.push({ username, active: false, ruleId: null });
   await saveDB();
   return { ok: true };
 }
 
-// Eliminar cuenta del seguimiento
+// Elimina una cuenta de seguimiento
 async function removeAccount(userId, username) {
   const user = await getUser(userId);
   user.tracked = user.tracked.filter(a => a.username !== username);
@@ -63,13 +68,13 @@ async function removeAccount(userId, username) {
   return true;
 }
 
-// Listar cuentas del usuario
+// Lista cuentas que sigue el usuario
 async function listAccounts(userId) {
   const user = await getUser(userId);
-  return user.tracked || [];
+  return user.tracked;
 }
 
-// Actualizar una cuenta específica
+// Actualiza datos de una cuenta
 async function updateAccount(userId, account) {
   const user = await getUser(userId);
   const idx  = user.tracked.findIndex(a => a.username === account.username);
@@ -81,15 +86,16 @@ async function updateAccount(userId, account) {
   return false;
 }
 
-// Cargar base de datos al iniciar
 loadDB();
 
 module.exports = {
   initUser,
   getUser,
+  getAllUsers,
+  setUserGroupChat,
   addAccount,
   removeAccount,
   listAccounts,
   updateAccount,
-  saveDB      // <-- exportamos saveDB para planService
+  saveDB
 };

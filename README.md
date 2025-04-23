@@ -13,15 +13,21 @@ Telegram bot que permite:
    TWITTER_API_KEY=tu_api_key
    TELEGRAM_BOT_TOKEN=tu_token
    
-# BotXTwitterApi-twitterapi
+# Bot X Tracker
 
-Bot de Telegram para seguir cuentas de X en tiempo real utilizando KaitoTwitterAPI.
+Bot de Telegram que permite interactuar en tiempo real con la API de Twitter (X) utilizando KaitoTwitterAPI. Incluye gestión de cuentas, seguimiento en tiempo real, búsqueda avanzada y planes escalables.
 
-## Carpeta de archivos
+## Funcionalidades principales
 
-- **config/**: Configuración de API y constantes.
-- **db/**: Base de datos local JSON y módulo de acceso.
-- **services/**: Integración con KaitoTwitterAPI y lógica de seguimiento.
-- **views/**: Plantillas de menús y mensajes para Telegram.
-- **app.js**: Orquestador principal del bot.
-- **package.json**: Dependencias del proyecto.
+- Agregar o eliminar cuentas de X (antes Twitter).
+- Seguir cuentas en tiempo real utilizando Webhook/WebSocket (actualización inmediata).
+- Buscar contenido por palabra clave, hashtag o nombre de usuario.
+- Ver tweets recientes de una cuenta.
+- Ver menciones recientes.
+- Ver lista de seguidores.
+- Gestión de planes por usuario:
+  - `basic`: hasta 10 cuentas.
+  - `intermediate`: hasta 20 cuentas.
+  - `pro`: hasta 50 cuentas.
+  - `premium`: hasta 100 cuentas.
+- Botón interactivo para menús y navegación (Telegram Inline Keyboard).

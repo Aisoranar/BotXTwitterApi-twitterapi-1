@@ -1,247 +1,175 @@
 // D:\Documents\GitHub\BotXTwitterApi-twitterapi\app.js
 'use strict';
 
-const TelegramBot           = require('node-telegram-bot-api');
-const config                = require('./config');
-const db                    = require('./db/database');
-const trackSvc              = require('./services/trackingService');
-const planSvc               = require('./services/planService');
-const menu                  = require('./views/telegramMenu');
-const logger                = require('./utils/logger');
-const accountActionsService = require('./services/accountActionsService');
+const TelegramBot = require('node-telegram-bot-api');
+const config      = require('./config');
+const db          = require('./db/database');
+const trackSvc    = require('./services/trackingService');
+const planSvc     = require('./services/planService');
+const menu        = require('./views/telegramMenu');
+const logger      = require('./utils/logger');
+const acctSvc     = require('./services/accountActionsService');
 
-const bot    = new TelegramBot(config.TELEGRAM_TOKEN, { polling: true });
+const bot = new TelegramBot(config.TELEGRAM_TOKEN, { polling: true });
 const states = {};
 
+// Verifica admin
 async function isAdmin(chatId, userId) {
   try {
-    const member = await bot.getChatMember(chatId, userId);
-    return ['administrator', 'creator'].includes(member.status);
-  } catch {
-    return false;
-  }
+    const m = await bot.getChatMember(chatId, userId);
+    return ['administrator','creator'].includes(m.status);
+  } catch { return false; }
 }
 
-// /start handler
+// /start — en privado o en grupo
 bot.onText(/\/start/, async (msg) => {
-  const {
-    chat: { id: chatId },
-    from: { id: uid, first_name }
-  } = msg;
+  const chatId = msg.chat.id;
+  const userId = msg.from.id;
+  const isGroup= msg.chat.type.endsWith('group');
 
-  await db.initUser(uid);
-  states[uid] = { state: null };
-  const admin = await isAdmin(chatId, uid);
+  if (isGroup) {
+    await db.setUserGroupChat(userId, chatId);
+    console.log(`▶️ Usuario ${userId} registrado en grupo ${chatId}`);
+  }
+  const admin = await isAdmin(chatId, userId);
+  const greeting = isGroup
+    ? '✅ Bot listo en este grupo—elige opción:'
+    : `👋 Hola <b>${msg.from.first_name}</b>!\n¿Qué deseas hoy?`;
 
-  const greeting = `👋 Hola, <b>${first_name}</b>!\n¿Qué deseas hacer hoy?`;
   await bot.sendMessage(chatId, greeting, { parse_mode: 'HTML' });
-  await bot.sendMessage(chatId, 'Elige una opción del menú:', menu.mainMenu(admin));
+  await bot.sendMessage(chatId, 'Elige una opción:', menu.mainMenu(admin));
 });
 
-// Callback query handler
+// Manejo de botones
 bot.on('callback_query', async (q) => {
-  const {
-    message: { chat: { id: chatId } },
-    from: { id: uid },
-    data
-  } = q;
-
-  const [cmd, arg] = data.split(':');
-  const admin      = await isAdmin(chatId, uid);
+  const chatId = q.message.chat.id;
+  const userId = q.from.id;
+  const [cmd,arg] = q.data.split(':');
+  const admin = await isAdmin(chatId, userId);
 
   try {
     switch (cmd) {
       case 'add':
-        states[uid].state = 'AWAIT_ADD';
+        states[userId] = { state: 'AWAIT_ADD' };
         await bot.sendMessage(chatId, menu.promptUsername());
         break;
-
       case 'delete':
-        states[uid].state = 'AWAIT_DELETE';
-        {
-          const list = await db.listAccounts(uid);
-          const kb   = list.map(a => ([{
-            text: `🗑️ @${a.username}`,
-            callback_data: `do_delete:${a.username}`
-          }]));
-          kb.push([{ text: '⬅️ Volver', callback_data: 'back' }]);
-          await bot.sendMessage(chatId, 'Selecciona cuenta a eliminar:', {
-            reply_markup: { inline_keyboard: kb }
-          });
-        }
+        states[userId] = { state: 'AWAIT_DELETE' };
+        const list = await db.listAccounts(userId);
+        const kb   = list.map(a=>([{ text:`🗑️ @${a.username}`, callback_data:`do_delete:${a.username}` }]));
+        kb.push([{ text:'⬅️ Volver', callback_data:'back' }]);
+        await bot.sendMessage(chatId,'Selecciona cuenta a eliminar:',{ reply_markup:{ inline_keyboard:kb } });
         break;
-
       case 'do_delete':
-        await db.removeAccount(uid, arg);
-        await bot.sendMessage(chatId, `🗑️ Cuenta @${arg} eliminada.`);
-        states[uid].state = null;
-        await bot.sendMessage(chatId, 'Elige una opción:', menu.mainMenu(admin));
+        await db.removeAccount(userId,arg);
+        await bot.sendMessage(chatId,`🗑️ Cuenta @${arg} eliminada.`);
+        states[userId] = {};
+        await bot.sendMessage(chatId,'Elige una opción:',menu.mainMenu(admin));
         break;
-
       case 'list': {
-        const accounts = await db.listAccounts(uid);
-        const text     = `<b>📋 Tus cuentas:</b>\n${menu.listView(accounts)}`;
-        await bot.sendMessage(chatId, text, { parse_mode: 'HTML' });
+        const accs = await db.listAccounts(userId);
+        await bot.sendMessage(chatId, `<b>📋 Tus cuentas:</b>\n${menu.listView(accs)}`, { parse_mode:'HTML' });
         break;
       }
-
-      case 'realtime':
-        states[uid].state = 'AWAIT_REALTIME';
-        {
-          const accounts = await db.listAccounts(uid);
-          const rMenu    = menu.realtimeMenu(accounts);
-          if (rMenu) {
-            await bot.sendMessage(chatId, '<b>🔔 Seguimiento en tiempo real</b>', rMenu);
-          } else {
-            await bot.sendMessage(chatId, 'No tienes cuentas para seguimiento.');
-          }
-        }
+      case 'realtime': {
+        states[userId] = { state:'AWAIT_REALTIME' };
+        const accs = await db.listAccounts(userId);
+        const rm   = menu.realtimeMenu(accs);
+        if (rm) await bot.sendMessage(chatId,'<b>🔔 Seguimiento realtime</b>',rm);
+        else   await bot.sendMessage(chatId,'No tienes cuentas.');
         break;
-
-      case 'toggle':
-        {
-          const accounts = await db.listAccounts(uid);
-          const acc      = accounts.find(a => a.username === arg);
-          if (acc) {
-            if (!acc.active) {
-              // Activa con webhook
-              await trackSvc.startTracking(bot, chatId, uid, arg);
-            } else {
-              // Desactiva la regla
-              await trackSvc.stopTracking(bot, chatId, uid, arg);
-            }
-          }
-          const updated = await db.listAccounts(uid);
-          await bot.sendMessage(
-            chatId,
-            '<b>🔔 Seguimiento en tiempo real</b>',
-            menu.realtimeMenu(updated)
-          );
+      }
+      case 'toggle': {
+        const accs = await db.listAccounts(userId);
+        const acc  = accs.find(a=>a.username===arg);
+        if (acc) {
+          if (!acc.active) await trackSvc.startTracking(bot,chatId,userId,arg);
+          else             await trackSvc.stopTracking(bot,chatId,userId,arg);
         }
+        const updated = await db.listAccounts(userId);
+        await bot.sendMessage(chatId,'<b>🔔 Seguimiento realtime</b>',menu.realtimeMenu(updated));
         break;
-
+      }
       case 'plan_menu':
-        if (admin) {
-          await bot.sendMessage(chatId, 'Elige un plan:', menu.planMenu());
-        } else {
-          await bot.sendMessage(chatId, 'Solo administradores pueden cambiar el plan.');
-        }
+        if (admin) await bot.sendMessage(chatId,'Elige plan:',menu.planMenu());
+        else       await bot.sendMessage(chatId,'Solo admin.');
         break;
-
       case 'plan':
         if (admin) {
-          await planSvc.upgradePlan(uid, arg);
-          await bot.sendMessage(chatId, `✅ Plan actualizado a <b>${arg}</b>.`, { parse_mode: 'HTML' });
-        } else {
-          await bot.sendMessage(chatId, 'No tienes permiso para cambiar planes.');
-        }
+          await planSvc.upgradePlan(userId,arg);
+          await bot.sendMessage(chatId,`✅ Plan: <b>${arg}</b>`,{ parse_mode:'HTML' });
+        } else await bot.sendMessage(chatId,'No tienes permiso.');
         break;
-
-      case 'actions':
-        {
-          const accounts = await db.listAccounts(uid);
-          if (!accounts.length) {
-            await bot.sendMessage(chatId, 'No tienes cuentas agregadas.');
-            break;
-          }
-          const kb = accounts.map(a => ([{
-            text: `@${a.username}`,
-            callback_data: `show_actions:${a.username}`
-          }]));
-          kb.push([{ text: '⬅️ Volver', callback_data: 'back' }]);
-          await bot.sendMessage(chatId, 'Selecciona una cuenta:', {
-            reply_markup: { inline_keyboard: kb }
-          });
+      case 'actions': {
+        const accs = await db.listAccounts(userId);
+        if (!accs.length) {
+          await bot.sendMessage(chatId,'No tienes cuentas.');
+          break;
         }
+        const kb2 = accs.map(a=>([{ text:`@${a.username}`, callback_data:`show_actions:${a.username}` }]));
+        kb2.push([{ text:'⬅️ Volver', callback_data:'back' }]);
+        await bot.sendMessage(chatId,'Selecciona cuenta:',{ reply_markup:{ inline_keyboard:kb2 } });
         break;
-
+      }
       case 'show_actions':
-        await bot.sendMessage(chatId, `Acciones de @${arg}:`, menu.accountActionsMenu(arg));
+        await bot.sendMessage(chatId,`Acciones de @${arg}:`,menu.accountActionsMenu(arg));
         break;
-
       case 'view_user': {
-        const msg = await accountActionsService.viewUser(arg);
-        await bot.sendMessage(chatId, msg, {
-          parse_mode: 'HTML',
-          disable_web_page_preview: true
-        });
+        const txt = await acctSvc.viewUser(arg);
+        await bot.sendMessage(chatId,txt,{ parse_mode:'HTML',disable_web_page_preview:true });
         break;
       }
-
       case 'last_tweet': {
-        const msg = await accountActionsService.lastTweet(arg);
-        await bot.sendMessage(chatId, msg, {
-          parse_mode: 'HTML',
-          disable_web_page_preview: true
-        });
+        const txt = await acctSvc.lastTweet(arg);
+        await bot.sendMessage(chatId,txt,{ parse_mode:'HTML',disable_web_page_preview:true });
         break;
       }
-
       case 'mentions': {
-        const msg = await accountActionsService.mentions(arg);
-        await bot.sendMessage(chatId, msg, {
-          parse_mode: 'HTML',
-          disable_web_page_preview: true
-        });
+        const txt = await acctSvc.mentions(arg);
+        await bot.sendMessage(chatId,txt,{ parse_mode:'HTML',disable_web_page_preview:true });
         break;
       }
-
       case 'replies': {
-        const msg = await accountActionsService.replies(arg);
-        await bot.sendMessage(chatId, msg, {
-          parse_mode: 'HTML',
-          disable_web_page_preview: true
-        });
+        const txt = await acctSvc.replies(arg);
+        await bot.sendMessage(chatId,txt,{ parse_mode:'HTML',disable_web_page_preview:true });
         break;
       }
-
       case 'retweets': {
-        const msg = await accountActionsService.retweets(arg);
-        await bot.sendMessage(chatId, msg, {
-          parse_mode: 'HTML',
-          disable_web_page_preview: true
-        });
+        const txt = await acctSvc.retweets(arg);
+        await bot.sendMessage(chatId,txt,{ parse_mode:'HTML',disable_web_page_preview:true });
         break;
       }
-
       case 'back':
-        states[uid].state = null;
-        await bot.sendMessage(chatId, 'Elige una opción:', menu.mainMenu(admin));
+        states[userId] = {};
+        await bot.sendMessage(chatId,'Elige una opción:',menu.mainMenu(admin));
         break;
-
       case 'exit':
-        delete states[uid];
-        await bot.sendMessage(chatId, '✔️ Hasta luego! Usa /start para volver.');
+        delete states[userId];
+        await bot.sendMessage(chatId,'✔️ Hasta luego! Usa /start para volver.');
         break;
     }
-
     await bot.answerCallbackQuery(q.id);
   } catch (err) {
-    logger.error(err.message);
-    await bot.sendMessage(chatId, 'Ha ocurrido un error, intenta de nuevo.');
+    logger.error(err.stack);
+    await bot.sendMessage(chatId,'❌ Ocurrió un error, intenta de nuevo.');
   }
 });
 
-// Manejador de mensajes libres
+// Flujo de texto libre (solo en privado) para AWAIT_ADD
 bot.on('message', async (msg) => {
-  const uid    = msg.from.id;
-  const chatId = msg.chat.id;
-  const state  = states[uid]?.state;
-  const text   = msg.text?.trim();
-
-  if (!text || msg.from.is_bot) return;
-
+  if (msg.text?.startsWith('/start')) return;
+  if (msg.chat.type !== 'private') return;
+  const userId = msg.from.id;
+  const state  = states[userId]?.state;
   if (state === 'AWAIT_ADD') {
-    const username = text.replace(/^@/, '');
-    const res      = await db.addAccount(uid, username);
-    let reply;
-    if (res.ok)            reply = `✅ @${username} agregada.`;
-    else if (res.reason==='exists') reply = `⚠️ @${username} ya existe.`;
-    else                   reply = '⚠️ Limite alcanzado.';
-
-    await bot.sendMessage(chatId, reply);
-    states[uid].state = null;
-    const admin = await isAdmin(chatId, uid);
-    await bot.sendMessage(chatId, 'Elige una opción:', menu.mainMenu(admin));
+    const username = msg.text.trim().replace(/^@/,'');
+    const res = await db.addAccount(userId,username);
+    let reply = res.ok ? `✅ @${username} agregada.` :
+                res.reason==='exists'? `⚠️ @${username} ya existe.` :
+                '⚠️ Límite alcanzado.';
+    await bot.sendMessage(msg.chat.id,reply);
+    states[userId] = {};
+    const admin = await isAdmin(msg.chat.id,userId);
+    await bot.sendMessage(msg.chat.id,'Elige una opción:',menu.mainMenu(admin));
   }
 });

@@ -4,64 +4,59 @@ const webhookService = require('./webhookService');
 const logger         = require('../utils/logger');
 
 /**
- * Inicia seguimiento en tiempo real para una cuenta usando Webhook/Websocket
+ * Activa seguimiento: crea o reutiliza la regla y la enciende
  */
 async function startTracking(bot, chatId, userId, username) {
   const user = await db.getUser(userId);
   const acc  = user.tracked.find(a => a.username === username);
-  if (!acc) return;
+  if (!acc) { 
+    logger.warn(`Usuario ${userId} no rastrea @${username}`); 
+    return; 
+  }
+  if (acc.active) {
+    await bot.sendMessage(chatId, `🔔 @${username} ya está activo.`);
+    return;
+  }
 
   try {
-    // 1) Crear la regla (devuelve ruleId)
-    const ruleId = await webhookService.addRule(username);
-
-    // 2) Activar la regla (is_effect = 1)
+    let ruleId = acc.ruleId || await webhookService.addRule(username);
+    logger.info(`Regla ${ruleId} para @${username}`);
     const ok = await webhookService.updateRule(ruleId, username, true);
-    if (!ok) throw new Error('No se pudo activar la regla');
+    if (!ok) throw new Error('activate fail');
 
-    // 3) Guardar ruleId y marcar activo
     acc.ruleId = ruleId;
     acc.active = true;
     await db.updateAccount(userId, acc);
 
-    await bot.sendMessage(
-      chatId,
-      `🔔 Seguimiento en tiempo real ACTIVADO para @${username}`
-    );
-  } catch (err) {
-    logger.error(`Error al iniciar seguimiento @${username}: ${err.message}`);
-    await bot.sendMessage(
-      chatId,
-      `⚠️ No se pudo activar el seguimiento en tiempo real para @${username}.`
-    );
+    await bot.sendMessage(chatId, `🔔 Seguimiento ACTIVADO para @${username}`);
+  } catch (e) {
+    logger.error(e.stack);
+    await bot.sendMessage(chatId, `⚠️ Error al activar @${username}: ${e.message}`);
   }
 }
 
 /**
- * Detiene seguimiento en tiempo real para una cuenta desactivando la regla
+ * Desactiva seguimiento: apaga la regla
  */
 async function stopTracking(bot, chatId, userId, username) {
   const user = await db.getUser(userId);
   const acc  = user.tracked.find(a => a.username === username);
-  if (!acc || !acc.ruleId) return;
+  if (!acc || !acc.ruleId) {
+    await bot.sendMessage(chatId, `🛑 @${username} no estaba activo.`);
+    return;
+  }
 
   try {
-    // Desactivar la regla (is_effect = 0)
-    await webhookService.updateRule(acc.ruleId, username, false);
+    const ok = await webhookService.updateRule(acc.ruleId, username, false);
+    if (!ok) throw new Error('deactivate fail');
 
     acc.active = false;
     await db.updateAccount(userId, acc);
 
-    await bot.sendMessage(
-      chatId,
-      `🛑 Seguimiento en tiempo real DETENIDO para @${username}`
-    );
-  } catch (err) {
-    logger.error(`Error al detener seguimiento @${username}: ${err.message}`);
-    await bot.sendMessage(
-      chatId,
-      `⚠️ No se pudo detener el seguimiento en tiempo real para @${username}.`
-    );
+    await bot.sendMessage(chatId, `🛑 Seguimiento DETENIDO para @${username}`);
+  } catch (e) {
+    logger.error(e.stack);
+    await bot.sendMessage(chatId, `⚠️ Error al detener @${username}: ${e.message}`);
   }
 }
 

@@ -7,7 +7,7 @@ const client = axios.create({
   headers: { 'X-API-Key': API_KEY }
 });
 
-// Agrega regla y retorna rule_id
+// Crea regla (devuelve rule_id)
 async function addRule(username) {
   const res = await client.post('/oapi/tweet_filter/add_rule', {
     tag: `rule_${username}`,
@@ -17,14 +17,14 @@ async function addRule(username) {
   return res.data.rule_id;
 }
 
-// Activa/desactiva la regla
-async function updateRule(rule_id, username, active) {
+// Activa/desactiva regla
+async function updateRule(ruleId, username, active) {
   const res = await client.post('/oapi/tweet_filter/update_rule', {
-    rule_id,
-    tag: `rule_${username}`,
-    value: `from:${username}`,
-    interval_seconds: 100,
-    is_effect: active ? 1 : 0
+    rule_id:        ruleId,
+    tag:            `rule_${username}`,
+    value:          `from:${username}`,
+    interval_seconds:100,
+    is_effect:      active ? 1 : 0
   });
   return res.data.status === 'success';
 }

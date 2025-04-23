@@ -1,4 +1,7 @@
-// D:\Documents\GitHub\BotXTwitterApi-twitterapi\utils\logger.js
+// ===========================================
+// utils/logger.js
+// Configuración de Winston para logging en consola
+// ===========================================
 const { createLogger, format, transports } = require('winston');
 
 const logger = createLogger({

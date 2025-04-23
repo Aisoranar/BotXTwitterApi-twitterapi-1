@@ -2,13 +2,12 @@
 const { PLANS } = require('../config');
 const db        = require('../db/database');
 
-// Sólo usado por admin:
 async function upgradePlan(userId, newPlan) {
-  const user = await db.getUser(userId);
+  const u = await db.getUser(userId);
   if (!PLANS[newPlan]) throw new Error('Plan inválido');
-  user.plan = newPlan;
+  u.plan = newPlan;
   await db.saveDB();
-  return user.plan;
+  return u.plan;
 }
 
 module.exports = { upgradePlan };
