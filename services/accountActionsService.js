@@ -1,72 +1,111 @@
-// D:\Documents\GitHub\BotXTwitterApi-twitterapi\services\accountActionsService.js
+// File: D:\Documents\GitHub\BotXTwitterApi-twitterapi\services\accountActionsService.js
 const twitterApi = require('./twitterApi');
 const logger     = require('../utils/logger');
 
-// Muestra datos básicos
+/**
+ * Muestra datos detallados de un usuario.
+ * @param {string} username
+ */
 async function viewUser(username) {
   try {
-    const d = await twitterApi.getUser(username);
-    return `👤 @${d.userName}\n📝 ${d.description||'—'}\n👥 ${d.followers||0}`;
+    const u = await twitterApi.getUser(username);
+    return [
+      `👤 <b>@${u.userName}</b> (${u.name})`,
+      `🆔 ID: ${u.id}`,
+      `📜 Bio: ${u.description || '—'}`,
+      `📍 Ubicación: ${u.location || '—'}`,
+      `✅ Verificado: ${u.isBlueVerified ? 'Sí' : 'No'}`,
+      `👥 Seguidores: ${u.followers}`,
+      `👣 Siguiendo: ${u.following}`,
+      `📝 Tweets: ${u.statusesCount}`,
+      `📅 Creado: ${new Date(u.createdAt).toLocaleDateString()}`
+    ].join('\n');
   } catch (e) {
-    logger.error(e.message);
-    throw new Error('No se pudo obtener info');
+    logger.error(e.stack);
+    throw new Error('No se pudo obtener información del usuario.');
   }
 }
 
-// Muestra último tweet
-async function lastTweet(username) {
+/**
+ * Muestra los últimos 5 tweets de un usuario.
+ * @param {string} username
+ */
+async function lastTweets(username) {
   try {
-    const t = await twitterApi.getLastTweet(username);
-    return t 
-      ? `📝 @${username}: ${t.text}\n🔗 ${t.url}` 
-      : `@${username} sin tweets`;
+    const tweets = await twitterApi.getUserLastTweets(username, 5);
+    if (!tweets.length) {
+      return `📝 @${username} no tiene tweets recientes.`;
+    }
+    return tweets
+      .map(t => `• ${t.text}\n  🔗 <a href="${t.url}">Ver en X</a>`)
+      .join('\n\n');
   } catch (e) {
-    logger.error(e.message);
-    throw new Error('No se pudo obtener último tweet');
+    logger.error(e.stack);
+    throw new Error('Error al obtener los últimos tweets.');
   }
 }
 
-// Menciones
+/**
+ * Muestra las últimas 5 menciones a un usuario.
+ * @param {string} username
+ */
 async function mentions(username) {
   try {
-    const arr = await twitterApi.getMentions(username);
-    return arr.length 
-      ? arr.map(m=>`• ${m.text} — ${m.url}`).join('\n\n') 
-      : `📣 Sin menciones @${username}`;
+    const tweets = await twitterApi.getMentions(username, 5);
+    if (!tweets.length) {
+      return `📣 No hay menciones a @${username}.`;
+    }
+    return tweets
+      .map(m => `• ${m.text}\n  💬 <a href="${m.url}">Ver en X</a>`)
+      .join('\n\n');
   } catch (e) {
-    logger.error(e.message);
-    throw new Error('Error menciones');
+    logger.error(e.stack);
+    throw new Error('Error al obtener menciones.');
   }
 }
 
-// Respuestas al último tweet
+/**
+ * Muestra las últimas 5 respuestas que el usuario hizo.
+ * @param {string} username
+ */
 async function replies(username) {
   try {
-    const lt = await twitterApi.getLastTweet(username);
-    if (!lt) return `💬 @${username} sin tweets`;
-    const rs = await twitterApi.getTweetReplies(lt.id);
-    return rs.length 
-      ? rs.map(r=>`↪️ ${r.text} — ${r.url}`).join('\n\n') 
-      : `💬 Sin respuestas`;
+    const tweets = await twitterApi.getUserReplies(username, 5);
+    if (!tweets.length) {
+      return `💬 @${username} no ha respondido recientemente.`;
+    }
+    return tweets
+      .map(r => `• ${r.text}\n  🔗 <a href="${r.url}">Ver en X</a>`)
+      .join('\n\n');
   } catch (e) {
-    logger.error(e.message);
-    throw new Error('Error replies');
+    logger.error(e.stack);
+    throw new Error('Error al obtener respuestas.');
   }
 }
 
-// Retweets del último tweet
+/**
+ * Muestra los últimos 5 retweets que el usuario hizo.
+ * @param {string} username
+ */
 async function retweets(username) {
   try {
-    const lt = await twitterApi.getLastTweet(username);
-    if (!lt) return `🔁 @${username} sin tweets`;
-    const rs = await twitterApi.getTweetRetweeters(lt.id);
-    return rs.length 
-      ? rs.map(r=>`🔁 ${r.text} — ${r.url}`).join('\n\n') 
-      : `🔁 Sin retweets`;
+    const tweets = await twitterApi.getUserRetweets(username, 5);
+    if (!tweets.length) {
+      return `🔁 @${username} no ha retweeteado recientemente.`;
+    }
+    return tweets
+      .map(r => `• ${r.text}\n  🔗 <a href="${r.url}">Ver en X</a>`)
+      .join('\n\n');
   } catch (e) {
-    logger.error(e.message);
-    throw new Error('Error retweets');
+    logger.error(e.stack);
+    throw new Error('Error al obtener retweets.');
   }
 }
 
-module.exports = { viewUser, lastTweet, mentions, replies, retweets };
+module.exports = {
+  viewUser,
+  lastTweets,
+  mentions,
+  replies,
+  retweets
+};

@@ -1,4 +1,4 @@
-// D:\Documents\GitHub\BotXTwitterApi-twitterapi\services\twitterApi.js
+// File: D:\Documents\GitHub\BotXTwitterApi-twitterapi\services\twitterApi.js
 const axios = require('axios');
 const { API_KEY, BASE_URL } = require('../config');
 const client = axios.create({
@@ -7,40 +7,75 @@ const client = axios.create({
   timeout: 5000
 });
 
-// Info de usuario
+/**
+ * Obtiene información detallada de un usuario.
+ * @param {string} username 
+ */
 async function getUser(username) {
-  const res = await client.get('/twitter/user/info', { params: { userName: username } });
+  const res = await client.get('/twitter/user/info', {
+    params: { userName: username }
+  });
   return res.data.data;
 }
 
-// Último tweet (excluye replies)
-async function getLastTweet(username) {
-  const res = await client.get('/twitter/user/last_tweets', { params: { userName: username } });
-  return res.data.tweets?.[0] || null;
+/**
+ * Obtiene hasta `count` últimos tweets de un usuario (excluye replies).
+ * @param {string} username 
+ * @param {number} count 
+ */
+async function getUserLastTweets(username, count = 5) {
+  const res = await client.get('/twitter/user/last_tweets', {
+    params: { userName: username, cursor: '' }
+  });
+  const tweets = res.data.tweets || [];
+  return tweets.slice(0, count);
 }
 
-// Menciones al usuario
-async function getMentions(username) {
-  const res = await client.get('/twitter/user/mentions', { params: { userName: username } });
-  return res.data.tweets || [];
+/**
+ * Obtiene hasta `count` menciones a un usuario.
+ * @param {string} username 
+ * @param {number} count 
+ */
+async function getMentions(username, count = 5) {
+  const res = await client.get('/twitter/user/mentions', {
+    params: { userName: username, cursor: '' }
+  });
+  const tweets = res.data.tweets || [];
+  return tweets.slice(0, count);
 }
 
-// Replies de un tweet
-async function getTweetReplies(tweetId) {
-  const res = await client.get('/twitter/tweet/replies', { params: { tweetId } });
-  return res.data.replies || [];
+/**
+ * Obtiene hasta `count` replies del usuario (usa búsqueda avanzada).
+ * @param {string} username 
+ * @param {number} count 
+ */
+async function getUserReplies(username, count = 5) {
+  const query = `from:${username} filter:replies`;
+  const res = await client.get('/twitter/tweet/advanced_search', {
+    params: { query, queryType: 'Latest', cursor: '' }
+  });
+  const tweets = res.data.tweets || [];
+  return tweets.slice(0, count);
 }
 
-// Usuarios que retweetearon
-async function getTweetRetweeters(tweetId) {
-  const res = await client.get('/twitter/tweet/retweeters', { params: { tweetId } });
-  return res.data.retweeters || [];
+/**
+ * Obtiene hasta `count` retweets del usuario (usa búsqueda avanzada).
+ * @param {string} username 
+ * @param {number} count 
+ */
+async function getUserRetweets(username, count = 5) {
+  const query = `from:${username} filter:retweets`;
+  const res = await client.get('/twitter/tweet/advanced_search', {
+    params: { query, queryType: 'Latest', cursor: '' }
+  });
+  const tweets = res.data.tweets || [];
+  return tweets.slice(0, count);
 }
 
 module.exports = {
   getUser,
-  getLastTweet,
+  getUserLastTweets,
   getMentions,
-  getTweetReplies,
-  getTweetRetweeters
+  getUserReplies,
+  getUserRetweets
 };

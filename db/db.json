@@ -3,19 +3,25 @@
     "tracked": [
       {
         "username": "Jessepollak",
-        "active": false,
+        "active": true,
         "ruleId": null,
-        "lastChecked": null
+        "lastChecked": "2025-04-23T12:55:14.210Z"
       },
       {
         "username": "BasedJaider",
+        "active": true,
+        "ruleId": null,
+        "lastChecked": "2025-04-23T12:54:51.005Z"
+      },
+      {
+        "username": "1CrypticPoet",
         "active": false,
         "ruleId": null,
         "lastChecked": null
       }
     ],
     "plan": "intermediate",
-    "groupChatId": null
+    "groupChatId": -1002513153868
   },
   "1339853448": {
     "tracked": [
