@@ -31,17 +31,16 @@ app.post('/webhook', async (req, res) => {
       const url      = `https://twitter.com/${username}/status/${tweet.id}`;
       logger.info(`▶️ Tweet de @${username}: ${text.slice(0,50)}…`);
 
-      // Fan-out: solo usuarios con active=true y groupChatId
       const all = db.getAllUsers();
       for (const uid of Object.keys(all)) {
         const user = await db.getUser(uid);
-        const acc  = user.tracked.find(a => a.username===username && a.active);
+        const acc  = user.tracked.find(a => a.username === username && a.active);
         if (!acc || !user.groupChatId) continue;
         const chatId = user.groupChatId;
         const msg = `🆕 <b>Nuevo tweet de @${username}</b>\n\n${text}\n\n🔗 <a href="${url}">Ver</a>`;
-        await bot.sendMessage(chatId,msg,{ parse_mode:'HTML',disable_web_page_preview:true })
-          .then(()=> logger.info(`✅ Enviado a chat ${chatId}`))
-          .catch(e=> logger.error(`❌ Error a ${chatId}: ${e.message}`));
+        await bot.sendMessage(chatId, msg, { parse_mode: 'HTML', disable_web_page_preview: true })
+          .then(() => logger.info(`✅ Enviado a chat ${chatId}`))
+          .catch(e => logger.error(`❌ Error a ${chatId}: ${e.message}`));
       }
     }
     res.status(200).json({ success: true });
@@ -51,6 +50,8 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
-app.listen(config.WEBHOOK_PORT, () =>
-  logger.info(`🚀 Webhook escuchando en ${config.WEBHOOK_PORT}`)
+// ✅ CAMBIO CLAVE PARA RENDER:
+const port = process.env.PORT || config.WEBHOOK_PORT || 4000;
+app.listen(port, '0.0.0.0', () =>
+  logger.info(`🚀 Webhook escuchando en ${port}`)
 );
