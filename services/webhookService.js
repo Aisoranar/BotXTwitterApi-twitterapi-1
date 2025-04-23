@@ -12,7 +12,7 @@ async function addRule(username) {
   const res = await client.post('/oapi/tweet_filter/add_rule', {
     tag: `rule_${username}`,
     value: `from:${username}`,
-    interval_seconds: 100
+    interval_seconds: 1
   });
   return res.data.rule_id;
 }
