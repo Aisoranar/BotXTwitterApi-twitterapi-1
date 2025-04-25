@@ -3,7 +3,7 @@
     "tracked": [
       {
         "username": "Jessepollak",
-        "active": true,
+        "active": false,
         "ruleId": null,
         "lastChecked": "2025-04-23T12:55:14.210Z"
       },
@@ -11,13 +11,13 @@
         "username": "BasedJaider",
         "active": true,
         "ruleId": null,
-        "lastChecked": "2025-04-23T12:54:51.005Z"
+        "lastChecked": "2025-04-23T21:25:50.237Z"
       },
       {
         "username": "1CrypticPoet",
         "active": false,
         "ruleId": null,
-        "lastChecked": null
+        "lastChecked": "2025-04-23T20:59:29.170Z"
       }
     ],
     "plan": "intermediate",
@@ -27,9 +27,15 @@
     "tracked": [
       {
         "username": "BasedJaider",
-        "active": false,
+        "active": true,
         "ruleId": null,
-        "lastChecked": null
+        "lastChecked": "2025-04-25T23:05:50.424Z"
+      },
+      {
+        "username": "Aarias53727",
+        "active": true,
+        "ruleId": null,
+        "lastChecked": "2025-04-25T23:06:03.861Z"
       }
     ],
     "plan": "premium",
