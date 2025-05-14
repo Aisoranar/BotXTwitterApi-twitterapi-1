@@ -27,15 +27,21 @@
     "tracked": [
       {
         "username": "BasedJaider",
-        "active": true,
+        "active": false,
         "ruleId": null,
-        "lastChecked": "2025-04-25T23:05:50.424Z"
+        "lastChecked": "2025-04-25T23:47:40.212Z"
       },
       {
         "username": "Aarias53727",
         "active": true,
         "ruleId": null,
-        "lastChecked": "2025-04-25T23:06:03.861Z"
+        "lastChecked": "2025-05-14T23:17:59.523Z"
+      },
+      {
+        "username": "elonmusk",
+        "active": true,
+        "ruleId": null,
+        "lastChecked": "2025-05-14T23:10:30.727Z"
       }
     ],
     "plan": "premium",
