@@ -1,50 +1,14 @@
 {
-  "1049055567": {
-    "tracked": [
-      {
-        "username": "Jessepollak",
-        "active": false,
-        "ruleId": null,
-        "lastChecked": "2025-04-23T12:55:14.210Z"
-      },
-      {
-        "username": "BasedJaider",
-        "active": true,
-        "ruleId": null,
-        "lastChecked": "2025-04-23T21:25:50.237Z"
-      },
-      {
-        "username": "1CrypticPoet",
-        "active": false,
-        "ruleId": null,
-        "lastChecked": "2025-04-23T20:59:29.170Z"
-      }
-    ],
-    "plan": "intermediate",
-    "groupChatId": -1002513153868
-  },
   "1339853448": {
     "tracked": [
       {
-        "username": "BasedJaider",
-        "active": false,
-        "ruleId": null,
-        "lastChecked": "2025-04-25T23:47:40.212Z"
-      },
-      {
-        "username": "Aarias53727",
+        "username": "petrogustavo",
         "active": true,
         "ruleId": null,
-        "lastChecked": "2025-05-14T23:17:59.523Z"
-      },
-      {
-        "username": "elonmusk",
-        "active": true,
-        "ruleId": null,
-        "lastChecked": "2025-05-14T23:10:30.727Z"
+        "lastChecked": "2025-05-20T02:13:56.358Z"
       }
     ],
-    "plan": "premium",
+    "plan": "intermediate",
     "groupChatId": -1002513153868
   }
 }
