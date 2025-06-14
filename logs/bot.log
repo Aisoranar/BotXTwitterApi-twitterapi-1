@@ -1,0 +1,53 @@
+[2025-06-14T19:03:58.897Z] [INFO] [SYS-001] Iniciando sistema | MEM: 56MB
+[2025-06-14T19:03:58.902Z] [INFO] [SYS-001] Logger iniciado | MEM: 58MB
+[2025-06-14T19:03:58.906Z] [INFO] [SYS-002] Sistema iniciado correctamente | MEM: 59MB
+[2025-06-14T19:03:58.913Z] [INFO] [DB-002] Datos cargados correctamente | MEM: 57MB
+[2025-06-14T19:03:58.914Z] [INFO] [DB-002] Base de datos inicializada | MEM: 57MB
+[2025-06-14T19:04:11.354Z] [INFO] [TG-001] Bot de Telegram iniciado correctamente | MEM: 49MB
+[2025-06-14T19:16:38.963Z] [DEBUG] [DB-001] Base de datos guardada | MEM: 51MB
+[2025-06-14T19:16:38.965Z] [INFO] [SYS-002] Sistema cerrado | MEM: 51MB
+[2025-06-14T19:17:05.412Z] [INFO] [SYS-001] Iniciando sistema | MEM: 56MB
+[2025-06-14T19:17:05.417Z] [INFO] [SYS-001] Logger iniciado | MEM: 58MB
+[2025-06-14T19:17:05.420Z] [INFO] [SYS-002] Sistema iniciado correctamente | MEM: 58MB
+[2025-06-14T19:17:05.428Z] [INFO] [DB-002] Datos cargados correctamente | MEM: 57MB
+[2025-06-14T19:17:05.429Z] [INFO] [DB-002] Base de datos inicializada | MEM: 57MB
+[2025-06-14T19:17:17.021Z] [INFO] [TG-001] Bot de Telegram iniciado correctamente | MEM: 48MB
+[2025-06-14T19:17:45.196Z] [INFO] [TG-003] Comando /start recibido | DATA: {"chatId":1160270653} | MEM: 49MB
+[2025-06-14T19:17:45.201Z] [DEBUG] [DB-001] Base de datos guardada | MEM: 49MB
+[2025-06-14T19:17:45.520Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 49MB
+[2025-06-14T19:17:57.549Z] [INFO] [TG-003] Callback recibido | DATA: {"chatId":1160270653,"data":"test_api"} | MEM: 49MB
+[2025-06-14T19:17:57.862Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 50MB
+[2025-06-14T19:17:58.478Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 50MB
+[2025-06-14T19:17:59.518Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 50MB
+[2025-06-14T19:17:59.815Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 50MB
+[2025-06-14T19:18:00.114Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 50MB
+[2025-06-14T19:18:00.118Z] [DEBUG] [TW-003] Request Twitter API | DATA: {"endpoint":"/twitter/user/info","requestId":1,"params":{"userName":"elonmusk"},"url":"https://api.twitterapi.io/twitter/user/info"} | MEM: 50MB
+[2025-06-14T19:18:00.237Z] [ERROR] [TW-003] Error HTTP en Twitter API | DATA: {"endpoint":"/twitter/user/info","requestId":1,"latency":119,"status":402,"responseData":{"error":"Unauthorized","message":"Credits is not enough.Please recharge"},"headers":{"date":"Sat, 14 Jun 2025 19:17:59 GMT","content-type":"application/json","content-length":"74","connection":"keep-alive","server":"cloudflare","x-trace-id":"136d48cc-ac77-4fb4-862b-276fa2ccc5b2","cf-cache-status":"DYNAMIC","nel":"{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}","report-to":"{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=52wO1A8Xi5FP7eBwAryocW9nrQfiGMMFnvt%2FPxJJNSVnZo9sFK4kPuIoDT3dIwM%2BBmDpVwUX1BPL1MkpareK9T75TuSSp5QCn4y5ba1MBnzO\"}]}","cf-ray":"94fc2bc5b8831670-MIA","alt-svc":"h3=\":443\"; ma=86400"}} | MEM: 50MB
+[2025-06-14T19:18:01.063Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 50MB
+[2025-06-14T19:18:02.364Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 50MB
+[2025-06-14T19:18:02.366Z] [DEBUG] [TW-003] Request Twitter API | DATA: {"endpoint":"/twitter/user/info","requestId":2,"params":{"userName":"twitter"},"url":"https://api.twitterapi.io/twitter/user/info"} | MEM: 50MB
+[2025-06-14T19:18:02.468Z] [ERROR] [TW-003] Error HTTP en Twitter API | DATA: {"endpoint":"/twitter/user/info","requestId":2,"latency":103,"status":402,"responseData":{"error":"Unauthorized","message":"Credits is not enough.Please recharge"},"headers":{"date":"Sat, 14 Jun 2025 19:18:01 GMT","content-type":"application/json","content-length":"74","connection":"keep-alive","server":"cloudflare","x-trace-id":"f5446aec-b305-4b6b-baed-69bf040a4caf","cf-cache-status":"DYNAMIC","nel":"{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}","report-to":"{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=eWHFeWRG4MEoWD4pn%2F5PD%2BrdpsSwZrI9nSX57gEjpYU4sQYiSXnZAgt3EtF9A1cUQQBru%2FnjhITt7J8EiP9dWo9qcs4VOxPiJyCgIZXu0MhH\"}]}","cf-ray":"94fc2bd3c8d41670-MIA","alt-svc":"h3=\":443\"; ma=86400"}} | MEM: 50MB
+[2025-06-14T19:18:02.776Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 50MB
+[2025-06-14T19:18:04.082Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 50MB
+[2025-06-14T19:18:04.083Z] [DEBUG] [TW-003] Request Twitter API | DATA: {"endpoint":"/twitter/user/info","requestId":3,"params":{"userName":"openai"},"url":"https://api.twitterapi.io/twitter/user/info"} | MEM: 50MB
+[2025-06-14T19:18:04.186Z] [ERROR] [TW-003] Error HTTP en Twitter API | DATA: {"endpoint":"/twitter/user/info","requestId":3,"latency":103,"status":402,"responseData":{"error":"Unauthorized","message":"Credits is not enough.Please recharge"},"headers":{"date":"Sat, 14 Jun 2025 19:18:03 GMT","content-type":"application/json","content-length":"74","connection":"keep-alive","server":"cloudflare","x-trace-id":"42bcbdbd-8beb-4b6a-899e-74db9e7d909a","cf-cache-status":"DYNAMIC","nel":"{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}","report-to":"{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=gEdT9L4c32vmmolCOsKuhHhrYiQzg9WoBmm8sk36zTlOi38Ei5yRkZYaMzpayQJ%2F0HM6c6QuIZaLHigvCnJUfEW6MSuK6P5lIqJFsELNzXd6\"}]}","cf-ray":"94fc2bde8f581670-MIA","alt-svc":"h3=\":443\"; ma=86400"}} | MEM: 50MB
+[2025-06-14T19:18:04.485Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 50MB
+[2025-06-14T19:18:05.795Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 50MB
+[2025-06-14T19:20:22.134Z] [INFO] [TG-003] Callback recibido | DATA: {"chatId":1160270653,"data":"health_check"} | MEM: 50MB
+[2025-06-14T19:20:23.088Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 51MB
+[2025-06-14T19:20:40.178Z] [INFO] [TG-003] Callback recibido | DATA: {"chatId":1160270653,"data":"help"} | MEM: 50MB
+[2025-06-14T19:20:40.505Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 51MB
+[2025-06-14T19:20:55.021Z] [INFO] [TG-003] Callback recibido | DATA: {"chatId":1160270653,"data":"full_stats"} | MEM: 51MB
+[2025-06-14T19:20:55.654Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 51MB
+[2025-06-14T19:21:03.029Z] [INFO] [TG-003] Callback recibido | DATA: {"chatId":1160270653,"data":"start_monitor"} | MEM: 52MB
+[2025-06-14T19:21:03.030Z] [WARN] [MON-006] No hay cuentas activas | MEM: 52MB
+[2025-06-14T19:21:03.329Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 52MB
+[2025-06-14T19:21:19.029Z] [INFO] [TG-003] Comando /add recibido | DATA: {"chatId":1160270653,"username":"Wilson Arias"} | MEM: 51MB
+[2025-06-14T19:21:19.031Z] [INFO] [ACC-001] Añadiendo cuenta | DATA: {"chatId":1160270653,"username":"Wilson Arias"} | MEM: 51MB
+[2025-06-14T19:21:19.356Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 51MB
+[2025-06-14T19:21:19.357Z] [DEBUG] [TW-003] Request Twitter API | DATA: {"endpoint":"/twitter/user/info","requestId":4,"params":{"userName":"Wilson Arias"},"url":"https://api.twitterapi.io/twitter/user/info"} | MEM: 51MB
+[2025-06-14T19:21:19.667Z] [ERROR] [TW-003] Error HTTP en Twitter API | DATA: {"endpoint":"/twitter/user/info","requestId":4,"latency":310,"status":402,"responseData":{"error":"Unauthorized","message":"Credits is not enough.Please recharge"},"headers":{"date":"Sat, 14 Jun 2025 19:21:18 GMT","content-type":"application/json","content-length":"74","connection":"keep-alive","server":"cloudflare","x-trace-id":"a3510e51-2e96-4ea7-a493-fe18ee0524d9","cf-cache-status":"DYNAMIC","nel":"{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}","report-to":"{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=cfdnff%2BpXeUcXhRYRIt2FH5VtP1srM90F0lzaCSs1whhpqqSqk%2FgUgf6SzswMwJ12rxSh1cxfT47vzk8FhpXvRuJpcq1A80mvPLnFzp1vgWT\"}]}","cf-ray":"94fc30a3bdcb875b-MIA","alt-svc":"h3=\":443\"; ma=86400"}} | MEM: 51MB
+[2025-06-14T19:21:19.668Z] [WARN] [TW-002] Usuario no encontrado | DATA: {"username":"Wilson Arias","status":402,"error":"HTTP 402: Credits is not enough.Please recharge","responseData":{"error":"Unauthorized","message":"Credits is not enough.Please recharge"},"fullResult":{"success":false,"error":"HTTP 402: Credits is not enough.Please recharge","status":402,"responseData":{"error":"Unauthorized","message":"Credits is not enough.Please recharge"},"latency":310,"requestId":4}} | MEM: 51MB
+[2025-06-14T19:21:19.986Z] [DEBUG] [TG-001] Mensaje enviado | DATA: {"chatId":1160270653} | MEM: 51MB
+[2025-06-14T19:23:33.213Z] [DEBUG] [DB-001] Base de datos guardada | MEM: 51MB
+[2025-06-14T19:23:33.214Z] [INFO] [SYS-002] Sistema cerrado | MEM: 51MB

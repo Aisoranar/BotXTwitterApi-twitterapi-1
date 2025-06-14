@@ -1,0 +1,17 @@
+{
+  "users": {
+    "1160270653": {
+      "firstName": "Cristian",
+      "createdAt": "2025-06-14T19:17:45.198Z",
+      "lastActivity": "2025-06-14T19:17:45.198Z"
+    }
+  },
+  "accounts": {},
+  "lastTweetIds": {},
+  "metrics": {
+    "totalTweetsProcessed": 0,
+    "totalErrors": 0,
+    "totalApiCalls": 0
+  },
+  "lastModified": "2025-06-14T19:23:33.210Z"
+}
